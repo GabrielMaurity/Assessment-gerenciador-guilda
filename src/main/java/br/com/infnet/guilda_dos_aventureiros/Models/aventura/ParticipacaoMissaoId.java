@@ -16,8 +16,8 @@ import java.util.UUID;
 public class ParticipacaoMissaoId implements Serializable {
 
     @Column(name = "missao_id")
-    private UUID missaoId;
+    private Long missaoId;
 
     @Column(name = "aventureiro_id")
-    private UUID aventureiroId;
+    private Long aventureiroId;
 }

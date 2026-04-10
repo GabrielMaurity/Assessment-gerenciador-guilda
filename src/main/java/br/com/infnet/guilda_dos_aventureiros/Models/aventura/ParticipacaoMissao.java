@@ -2,8 +2,6 @@ package br.com.infnet.guilda_dos_aventureiros.Models.aventura;
 
 import br.com.infnet.guilda_dos_aventureiros.Models.core.Aventureiro;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,23 +32,21 @@ public class ParticipacaoMissao {
     @JoinColumn(name = "aventureiro_id", nullable = false)
     private Aventureiro aventureiro;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "papel_missao", nullable = false)
+    @Column(name = "papel", nullable = false)
     private PapelMissao papelMissao;
 
-    @Min(0)
     @Column(name = "recompensa_ouro")
-    private Double recompensaOuro;
+    private Integer recompensaOuro;
 
     @Column(nullable = false)
-    private Boolean mvp = false;
+    private Boolean destaque = false;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "data_registro", updatable = false)
+    private LocalDateTime dataRegistro;
 
     @PrePersist
     private void prePersist() {
-        createdAt = LocalDateTime.now();
+        dataRegistro = LocalDateTime.now();
     }
 }

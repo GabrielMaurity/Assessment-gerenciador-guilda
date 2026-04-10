@@ -12,27 +12,27 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "companheiro", schema = "aventura")
 public class Companheiro {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-    private UUID id;
+    @Column(name = "aventureiro_id")
+    private Long aventureiroId;
 
-    @NotBlank
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "aventureiro_id")
+    private Aventureiro aventureiro;
+
     @Column(length = 120, nullable = false)
     private String nome;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Especie especie;
 
     @Min(0) @Max(100)
-    @Column(nullable = false)
-    private int lealdade;
+    @Column(name = "indice_lealdade", nullable = false)
+    private Integer lealdade;
 }

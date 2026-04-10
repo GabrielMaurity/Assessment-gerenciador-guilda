@@ -21,9 +21,9 @@ import java.util.UUID;
 public class Missao {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false, nullable = false)
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "organizacao_id", nullable = false)
@@ -43,20 +43,20 @@ public class Missao {
     @Column(nullable = false)
     private StatusMissao status = StatusMissao.PLANEJADA;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "data_criacao", updatable = false)
+    private LocalDateTime dataCriacao;
 
     @Column(name = "data_inicio")
     private LocalDateTime dataInicio;
 
-    @Column(name = "data_termino")
-    private LocalDateTime dataTermino;
+    @Column(name = "data_fim")
+    private LocalDateTime dataFim;
 
     @OneToMany(mappedBy = "missao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ParticipacaoMissao> participacoes = new ArrayList<>();
 
     @PrePersist
     private void prePersist() {
-        createdAt = LocalDateTime.now();
+        dataCriacao = LocalDateTime.now();
     }
 }

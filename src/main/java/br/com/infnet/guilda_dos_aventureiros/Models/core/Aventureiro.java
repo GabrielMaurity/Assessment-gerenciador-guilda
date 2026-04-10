@@ -21,16 +21,16 @@ import java.util.UUID;
 public class Aventureiro {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false, nullable = false)
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "organizacao_id", nullable = false)
     private Organizacao organizacao;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @JoinColumn(name = "usuario_cadastro_id", nullable = false)
     private Usuario usuarioResponsavel;
 
     @NotBlank
@@ -49,24 +49,23 @@ public class Aventureiro {
     @Column(nullable = false)
     private Boolean ativo = true;
 
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "data_criacao", updatable = false)
+    private LocalDateTime dataCriacao;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "data_atualizacao")
+    private LocalDateTime dataAtualizacao;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_companheiro")
+    @OneToOne(mappedBy = "aventureiro", cascade = CascadeType.ALL, orphanRemoval = true)
     private Companheiro companheiro;
 
     @PrePersist
     private void prePersist() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        dataCriacao = LocalDateTime.now();
+        dataAtualizacao = LocalDateTime.now();
     }
 
     @PreUpdate
     private void preUpdate() {
-        updatedAt = LocalDateTime.now();
+        dataAtualizacao = LocalDateTime.now();
     }
 }
