@@ -1,20 +1,12 @@
 package br.com.infnet.guilda_dos_aventureiros.Controllers;
 
 import br.com.infnet.guilda_dos_aventureiros.Models.aventura.*;
-import br.com.infnet.guilda_dos_aventureiros.Models.core.Aventureiro;
-import br.com.infnet.guilda_dos_aventureiros.Models.legacy.Organizacao;
-import br.com.infnet.guilda_dos_aventureiros.Repository.AventureiroRepository;
-import br.com.infnet.guilda_dos_aventureiros.Repository.MissaoRepository;
-import br.com.infnet.guilda_dos_aventureiros.Repository.OrganizacaoRepository;
-import br.com.infnet.guilda_dos_aventureiros.Repository.ParticipacaoMissaoRepository;
+import br.com.infnet.guilda_dos_aventureiros.Service.MissaoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,22 +16,12 @@ import java.util.UUID;
 @RequestMapping("/guilda/missoes")
 public class MissaoController {
 
-    private final MissaoRepository missaoRepository;
-    private final AventureiroRepository aventureiroRepository;
-    private final ParticipacaoMissaoRepository participacaoRepository;
-    private final OrganizacaoRepository organizacaoRepository;
+    private final MissaoService service;
 
-    public MissaoController(MissaoRepository missaoRepository,
-                            AventureiroRepository aventureiroRepository,
-                            ParticipacaoMissaoRepository participacaoRepository,
-                            OrganizacaoRepository organizacaoRepository) {
-        this.missaoRepository = missaoRepository;
-        this.aventureiroRepository = aventureiroRepository;
-        this.participacaoRepository = participacaoRepository;
-        this.organizacaoRepository = organizacaoRepository;
+    public MissaoController(MissaoService service) {
+        this.service = service;
     }
 
-    // Listar missões com filtros
     @GetMapping
     public ResponseEntity<List<Missao>> listarMissoes(
             @RequestParam(required = false) StatusMissao status,
@@ -49,99 +31,47 @@ public class MissaoController {
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Missao> resultado = missaoRepository.buscarComFiltros(status, nivelPerigo, dataInicio, dataTermino, pageable);
-
+        Page<Missao> resultado = service.listarComFiltros(status, nivelPerigo, dataInicio, dataTermino, page, size);
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(resultado.getTotalElements()))
                 .header("X-Total-Pages", String.valueOf(resultado.getTotalPages()))
                 .body(resultado.getContent());
     }
 
-    // Buscar missão por ID com participantes
     @GetMapping("/{id}")
-    public ResponseEntity<Missao> buscarMissao(@PathVariable UUID id) {
-        return missaoRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Missao> buscarMissao(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    // Criar missão
     @PostMapping
     public ResponseEntity<Missao> criarMissao(@Valid @RequestBody Missao missao) {
-        Organizacao organizacao = organizacaoRepository.findById(missao.getOrganizacao().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Organização não encontrada"));
-
-        missao.setOrganizacao(organizacao);
-        missao.setStatus(StatusMissao.PLANEJADA);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(missaoRepository.save(missao));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.criar(missao));
     }
 
-    // Adicionar participante à missão
     @PostMapping("/{missaoId}/participantes/{aventureiroId}")
     public ResponseEntity<Void> adicionarParticipante(
-            @PathVariable UUID missaoId,
-            @PathVariable UUID aventureiroId,
+            @PathVariable Long missaoId,
+            @PathVariable Long aventureiroId,
             @Valid @RequestBody ParticipacaoMissao participacao
     ) {
-        Missao missao = missaoRepository.findById(missaoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Missão não encontrada"));
-
-        if (missao.getStatus() == StatusMissao.CONCLUIDA || missao.getStatus() == StatusMissao.CANCELADA) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missão não está aceitando participantes");
-        }
-
-        Aventureiro aventureiro = aventureiroRepository.findById(aventureiroId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Aventureiro não encontrado"));
-
-        if (!aventureiro.getAtivo()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aventureiro inativo não pode participar de missões");
-        }
-
-        if (!aventureiro.getOrganizacao().getId().equals(missao.getOrganizacao().getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aventureiro não pertence à mesma organização da missão");
-        }
-
-        if (participacaoRepository.existsByMissaoIdAndAventureiroId(missaoId, aventureiroId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Aventureiro já participa desta missão");
-        }
-
-        ParticipacaoMissaoId id = new ParticipacaoMissaoId(missaoId, aventureiroId);
-        participacao.setId(id);
-        participacao.setMissao(missao);
-        participacao.setAventureiro(aventureiro);
-
-        participacaoRepository.save(participacao);
+        service.adicionarParticipante(missaoId, aventureiroId, participacao);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // Remover participante da missão
     @DeleteMapping("/{missaoId}/participantes/{aventureiroId}")
     public ResponseEntity<Void> removerParticipante(
-            @PathVariable UUID missaoId,
-            @PathVariable UUID aventureiroId
+            @PathVariable Long missaoId,
+            @PathVariable Long aventureiroId
     ) {
-        ParticipacaoMissaoId id = new ParticipacaoMissaoId(missaoId, aventureiroId);
-
-        if (!participacaoRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        participacaoRepository.deleteById(id);
+        service.removerParticipante(missaoId, aventureiroId);
         return ResponseEntity.noContent().build();
     }
 
-    // Atualizar status da missão
     @PatchMapping("/{id}/status")
     public ResponseEntity<Missao> atualizarStatus(
-            @PathVariable UUID id,
+            @PathVariable Long id,
             @RequestParam StatusMissao status
     ) {
-        Missao missao = missaoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Missão não encontrada"));
-
-        missao.setStatus(status);
-        return ResponseEntity.ok(missaoRepository.save(missao));
+        return ResponseEntity.ok(service.atualizarStatus(id, status));
     }
 }

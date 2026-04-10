@@ -3,15 +3,10 @@ package br.com.infnet.guilda_dos_aventureiros.Controllers;
 import br.com.infnet.guilda_dos_aventureiros.Dto.MissaoMetricaDto;
 import br.com.infnet.guilda_dos_aventureiros.Dto.RankingAventureiroDto;
 import br.com.infnet.guilda_dos_aventureiros.Models.aventura.StatusMissao;
-import br.com.infnet.guilda_dos_aventureiros.Repository.MissaoRepository;
-import br.com.infnet.guilda_dos_aventureiros.Repository.ParticipacaoMissaoRepository;
+import br.com.infnet.guilda_dos_aventureiros.Service.RelatorioService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -19,12 +14,10 @@ import java.time.LocalDateTime;
 @RequestMapping("/guilda/relatorios")
 public class RelatorioController {
 
-    private final ParticipacaoMissaoRepository participacaoRepository;
-    private final MissaoRepository missaoRepository;
+    private final RelatorioService service;
 
-    public RelatorioController(ParticipacaoMissaoRepository participacaoRepository, MissaoRepository missaoRepository) {
-        this.participacaoRepository = participacaoRepository;
-        this.missaoRepository = missaoRepository;
+    public RelatorioController(RelatorioService service) {
+        this.service = service;
     }
 
     @GetMapping("/ranking")
@@ -35,7 +28,7 @@ public class RelatorioController {
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        return ResponseEntity.ok(participacaoRepository.gerarRanking(dataInicio, dataTermino, status, PageRequest.of(page, size)));
+        return ResponseEntity.ok(service.obterRanking(dataInicio, dataTermino, status, page, size));
     }
 
     @GetMapping("/metricas-missoes")
@@ -45,6 +38,6 @@ public class RelatorioController {
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ) {
-        return ResponseEntity.ok(missaoRepository.gerarRelatorioMetricas(dataInicio, dataTermino, PageRequest.of(page, size)));
+        return ResponseEntity.ok(service.obterMetricasMissoes(dataInicio, dataTermino, page, size));
     }
 }
