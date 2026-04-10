@@ -14,7 +14,7 @@ import java.util.UUID;
 
 
 @Repository
-public interface AventureiroRepository extends JpaRepository<Aventureiro, UUID> {
+public interface AventureiroRepository extends JpaRepository<Aventureiro, Long> {
 
     @Query("SELECT a FROM Aventureiro a WHERE " +
             "(:classe IS NULL OR a.classe = :classe) AND " +
@@ -24,9 +24,9 @@ public interface AventureiroRepository extends JpaRepository<Aventureiro, UUID> 
 
     Page<Aventureiro> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 
-    @Query("SELECT p.missao FROM ParticipacaoMissao p WHERE p.aventureiro.id = :aventureiroId ORDER BY p.createdAt DESC LIMIT 1")
-    Optional<Missao> buscarUltimaMissao(@Param("aventureiroId") UUID aventureiroId);
+    @Query("SELECT p.missao FROM ParticipacaoMissao p WHERE p.aventureiro.id = :aventureiroId ORDER BY p.dataRegistro DESC LIMIT 1")
+    Optional<Missao> buscarUltimaMissao(@Param("aventureiroId") Long aventureiroId);
 
     @Query("SELECT COUNT(p) FROM ParticipacaoMissao p WHERE p.aventureiro.id = :aventureiroId")
-    Long contarParticipacoes(@Param("aventureiroId") UUID aventureiroId);
+    Long contarParticipacoes(@Param("aventureiroId") Long aventureiroId);
 }

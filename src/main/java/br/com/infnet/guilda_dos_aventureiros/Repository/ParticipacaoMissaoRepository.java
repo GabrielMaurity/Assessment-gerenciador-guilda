@@ -18,22 +18,22 @@ import java.util.UUID;
 @Repository
 public interface ParticipacaoMissaoRepository extends JpaRepository<ParticipacaoMissao, ParticipacaoMissaoId> {
 
-    boolean existsByMissaoIdAndAventureiroId(UUID missaoId, UUID aventureiroId);
+    boolean existsByMissaoIdAndAventureiroId(Long missaoId, Long aventureiroId);
 
     List<ParticipacaoMissao> findByAventureiroId(UUID aventureiroId);
 
     @Query("SELECT p.aventureiro.id AS aventureiroId, p.aventureiro.nome AS nome, " +
             "COUNT(p) AS totalParticipacoes, SUM(p.recompensaOuro) AS totalRecompensas, " +
-            "SUM(CASE WHEN p.mvp = true THEN 1 ELSE 0 END) AS totalMvps " +
+            "SUM(CASE WHEN p.destaque = true THEN 1 ELSE 0 END) AS totalDestaques " +
             "FROM ParticipacaoMissao p " +
             "WHERE (cast(:dataInicio as timestamp) IS NULL OR p.missao.dataInicio >= :dataInicio) " +
-            "AND (cast(:dataTermino as timestamp) IS NULL OR p.missao.dataTermino <= :dataTermino) " +
+            "AND (cast(:dataFim as timestamp) IS NULL OR p.missao.dataFim <= :dataFim) " +
             "AND (cast(:status as string) IS NULL OR p.missao.status = :status) " +
             "GROUP BY p.aventureiro.id, p.aventureiro.nome " +
             "ORDER BY totalParticipacoes DESC")
     Page<RankingAventureiroDto> gerarRanking(
             @Param("dataInicio") LocalDateTime dataInicio,
-            @Param("dataTermino") LocalDateTime dataTermino,
+            @Param("dataFim") LocalDateTime dataFim,
             @Param("status") StatusMissao status,
             Pageable pageable
     );
