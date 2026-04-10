@@ -71,7 +71,7 @@ public class ConsultasERelatoriosTest {
         missao.setStatus(StatusMissao.CONCLUIDA);
         missao.setOrganizacao(org);
         missao.setDataInicio(LocalDateTime.now().minusDays(2));
-        missao.setDataTermino(LocalDateTime.now().plusDays(2));
+        missao.setDataFim(LocalDateTime.now().plusDays(2));
         missaoSalva = missaoRepository.save(missao);
 
         ParticipacaoMissao participacao = new ParticipacaoMissao();
@@ -79,8 +79,8 @@ public class ConsultasERelatoriosTest {
         participacao.setMissao(missaoSalva);
         participacao.setAventureiro(aventureiroSalvo);
         participacao.setPapelMissao(PapelMissao.LIDER);
-        participacao.setRecompensaOuro(500.0);
-        participacao.setMvp(true);
+        participacao.setRecompensaOuro(500);
+        participacao.setDestaque(true);
         participacaoRepository.save(participacao);
     }
 
@@ -114,7 +114,6 @@ public class ConsultasERelatoriosTest {
 
     @Test
     void deveGerarMetricasDeMissoes() {
-        // Defina um intervalo de busca que inclua o dia de hoje
         LocalDateTime inicio = LocalDateTime.now().minusDays(5);
         LocalDateTime fim = LocalDateTime.now().plusDays(5);
 
@@ -123,7 +122,6 @@ public class ConsultasERelatoriosTest {
                 fim,
                 PageRequest.of(0, 10));
 
-        // Agora o assert não deve mais falhar
         assertThat(metricas.getContent()).isNotEmpty();
         assertThat(metricas.getContent().get(0).getTitulo()).isEqualTo("Caça ao Dragão");
     }
