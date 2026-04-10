@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 public class AventureiroResumoDto {
-    private UUID id;
+    private Long id;
     private String nome;
     private Classe classe;
     private Integer nivel;
