@@ -1,0 +1,36 @@
+services:
+
+  db:
+    image: leogloriainfnet/postgres-tp2-spring:2.0-mac
+    container_name: db-guilda
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - guilda-network
+
+  elasticsearch:
+    image: leogloriainfnet/elastic-tp2-spring:1.0-windows
+    container_name: elastic-guilda
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    networks:
+      - guilda-network
+
+volumes:
+  postgres-data:
+    external: true
+    name: 3587d738448a1a500bce47c22a07609b1b0065ff966a4f0fe42ecf93de60e4c3
+
+networks:
+  guilda-network:
+    driver: bridge
