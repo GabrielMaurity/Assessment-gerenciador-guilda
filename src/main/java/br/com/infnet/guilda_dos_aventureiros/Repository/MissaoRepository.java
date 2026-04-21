@@ -19,8 +19,8 @@ public interface MissaoRepository extends JpaRepository<Missao, Long> {
     @Query("SELECT m FROM Missao m WHERE " +
             "(:status IS NULL OR m.status = :status) AND " +
             "(:nivelPerigo IS NULL OR m.nivelPerigo = :nivelPerigo) AND " +
-            "(:dataInicio IS NULL OR m.dataInicio >= :dataInicio) AND " +
-            "(:dataFim IS NULL OR m.dataFim <= :dataFim)")
+            "(cast(:dataInicio as timestamp) IS NULL OR m.dataInicio >= :dataInicio) AND " +
+            "(cast(:dataFim as timestamp) IS NULL OR m.dataFim <= :dataFim)")
     Page<Missao> buscarComFiltros(
             @Param("status") StatusMissao status,
             @Param("nivelPerigo") NivelPerigo nivelPerigo,
