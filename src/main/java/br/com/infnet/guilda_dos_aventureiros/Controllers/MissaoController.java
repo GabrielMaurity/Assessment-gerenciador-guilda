@@ -1,6 +1,9 @@
 package br.com.infnet.guilda_dos_aventureiros.Controllers;
 
-import br.com.infnet.guilda_dos_aventureiros.Models.aventura.*;
+import br.com.infnet.guilda_dos_aventureiros.Models.aventura.Missao;
+import br.com.infnet.guilda_dos_aventureiros.Models.aventura.NivelPerigo;
+import br.com.infnet.guilda_dos_aventureiros.Models.aventura.ParticipacaoMissao;
+import br.com.infnet.guilda_dos_aventureiros.Models.aventura.StatusMissao;
 import br.com.infnet.guilda_dos_aventureiros.Service.MissaoService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -10,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/guilda/missoes")
